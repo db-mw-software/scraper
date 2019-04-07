@@ -1,5 +1,6 @@
 const request = require("request");
 const fs = require('fs');
+const delayInRequests = 1000;
 const sep = '\t';
 const fileName = './allshows.csv';
 const venues = [
@@ -15,26 +16,23 @@ fs.writeFile(fileName, '', (error) => {
   if (error) {
     console.log(`Error writing blank ${fileName}`, error);
   } else {
-    getAndWriteConcerts();
+    (aVenue => getShowsFor(aVenue))(venues.length);
   }
 });
 
-function getAndWriteConcerts() {
-  for (let venue of venues) {
-    getShowsFor(venue);
-  }
-}
-
-function getShowsFor(venue) {
-  const options = {
-    method: 'GET',
-    url: 'https://api.songkick.com/api/3.0/venues/' + venue.id + '/calendar.json',
-    qs: { apikey: '1zxi7X202ZmTZfrj' }
-  };
-  request(options, (error, response, body) => {
-    if (error) throw new Error(error);
-    parseVenue(JSON.parse(body), venue.name);
-  });
+function getShowsFor(aVenue) {
+  setTimeout(() => {
+    const options = {
+      method: 'GET',
+      url: 'https://api.songkick.com/api/3.0/venues/' + venues[aVenue - 1].id + '/calendar.json',
+      qs: { apikey: '1zxi7X202ZmTZfrj' }
+    };
+    request(options, (error, response, body) => {
+      if (error) throw new Error(error);
+      parseVenue(JSON.parse(body), venues[aVenue - 1].name);
+      if (--aVenue) getShowsFor(aVenue);
+    });
+  }, delayInRequests);
 }
 
 function parseVenue(events, venueName) {
