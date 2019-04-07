@@ -2,7 +2,9 @@ const request = require("request");
 const fs = require('fs');
 const delayInRequests = 1000;
 const sep = '\t';
-const fileName = './allshows.csv';
+const showsFileName = './allshows.csv';
+const artistsFileName = './allartists.csv';
+const artistsNamesFileName = './artistsNames.json'
 const venues = [
   { "name": "Lincoln Hall", "id": 513326 },
   { "name": "Riviera Theatre", "id": 1284 },
@@ -12,13 +14,19 @@ const venues = [
   { "name": "Empty Bottle", "id": 251 },
 ];
 
-fs.writeFile(fileName, '', (error) => {
-  if (error) {
-    console.log(`Error writing blank ${fileName}`, error);
-  } else {
-    (aVenue => getShowsFor(aVenue))(venues.length);
-  }
+fs.writeFile(artistsNamesFileName, '[', (error) => {
+  if (error) console.log(`Error writing blank ${artistsNamesFileName}`, error);
+  else
+    fs.writeFile(artistsFileName, '', (error) => {
+      if (error) console.log(`Error writing blank ${artistsFileName}`, error);
+      else
+        fs.writeFile(showsFileName, '', (error) => {
+          if (error) console.log(`Error writing blank ${showsFileName}`, error);
+          else (aVenue => getShowsFor(aVenue))(venues.length);
+        });
+    });
 });
+
 
 function getShowsFor(aVenue) {
   setTimeout(() => {
@@ -45,7 +53,7 @@ function parseVenue(events, venueName) {
       shows += concertRowFor(event, sep) + '\n';
     }
   }
-  appendToFile(shows, venueName);
+  appendToFile(shows, showsFileName, venueName);
 }
 
 function concertRowFor(event, separator) {
@@ -57,15 +65,22 @@ function concertRowFor(event, separator) {
   show += event.ageRestriction + separator; //note could be null
   for (let band of event.performance) {
     show += band.id + separator;
+    writeArtist(band.artist, separator);
   }
   return show;
 }
 
-function appendToFile(shows, venueName) {
-  fs.appendFile(fileName, shows, (error) => {
+function writeArtist(artist, separator) {
+  const artistRow = artist.id + separator + artist.displayName + separator + artist.uri + '\n';
+  appendToFile(artistRow, artistsFileName);
+  appendToFile(`"${artist.displayName}",`, artistsNamesFileName);
+}
+
+function appendToFile(content, fileName, description = false) {
+  fs.appendFile(fileName, content, (error) => {
     if (error) {
-      console.log(`Error writing shows for ${venueName}:`, error);
+      console.log(`Error writing ${description ? description : fileName}:`, error);
     }
-    console.log(`Shows for ${venueName} were saved successfully!`);
+    else if (description) console.log(`Content for ${description} was saved successfully!`);
   });
 }
