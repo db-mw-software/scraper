@@ -1,6 +1,6 @@
 allshows.csv
 allartists.csv
 artistsNames.json
-venueDetails.csv
+venueDetails.tsv
 node_modules
 .DS_Store

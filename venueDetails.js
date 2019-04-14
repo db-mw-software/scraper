@@ -2,8 +2,7 @@ const fs = require('fs');
 const request = require('request');
 const sep = '\t';
 const delayInRequests = 500;
-const artistsFileName = './allartists_more_details.csv';
-const venueDetailsFileName = './venueDetails.csv';
+const venueDetailsFileName = './venueDetails.tsv';
 
 const venues = [
   { "name": "Lincoln Hall", "id": 513326 },
